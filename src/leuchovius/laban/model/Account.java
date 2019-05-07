@@ -5,16 +5,20 @@ public class Account {
   private String name;
   private String password;
 
-  public Account(String service, String name, String password) {
-    if (service.trim().isEmpty()) {
-      service =  "not specified";
-    }
-    if (name.trim().isEmpty()) {
-      name = "not specified";
-    }
-    this.service = service;
-    this.name = name;
+  public Account(String service, String name, String password) throws IllegalArgumentException {
+    this.service = normalizeInput(service);
+    this.name = normalizeInput(name);
     this.password = password;
+  }
+
+  private String normalizeInput(String input) throws IllegalArgumentException {
+    input = input.trim();
+    if (input.length() > 20) {
+      throw new IllegalArgumentException("Input can not be longer than 20 characters");
+    } else if (input.isEmpty()) {
+      input = "[not specified]";
+    }
+    return input;
   }
 
   //TODO: See if you actually need setters. I'll keep them for now

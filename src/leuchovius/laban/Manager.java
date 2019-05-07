@@ -42,15 +42,25 @@ public class Manager {
 
   //TODO: Finish promptNewAccount method
   private Account promptNewAccount() {
+    Account account = null;
+    Boolean isValid = false;
     System.out.printf("Account information related to your password: "
         + "%nTip! If you don't want a certain piece of info to accompany your password, "
         + "skip it by just pressing enter. %n");
-    System.out.print("Service (where you use your account):");
-    String service = scanner.nextLine();
-    System.out.print("Account name: ");
-    String name = scanner.nextLine();
-    System.out.print("Password: ");
-    String password = scanner.nextLine();
-    return new Account(service, name, password);
+    do {
+      System.out.print("Service (where you use your account): ");
+      String service = scanner.nextLine();
+      System.out.print("Account name: ");
+      String name = scanner.nextLine();
+      System.out.print("Password: ");
+      String password = scanner.nextLine();
+      try {
+        account = new Account(service, name, password);
+        isValid = true;
+      } catch (IllegalArgumentException iae) {
+        System.out.printf("%s. Please try again. %n", iae.getMessage());
+      }
+    } while (!isValid);
+    return account;
   }
 }
