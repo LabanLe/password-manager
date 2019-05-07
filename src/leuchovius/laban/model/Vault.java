@@ -16,7 +16,9 @@ public class Vault {
   }
 
   public void print() {
-    System.out.println(accounts);
+    for (Account account : accounts) {
+      System.out.println(account);
+    }
   }
 
 }

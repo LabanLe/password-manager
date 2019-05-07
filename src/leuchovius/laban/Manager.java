@@ -24,6 +24,7 @@ public class Manager {
   public void run() {
     String choice;
     do {
+      System.out.printf("%n%n%n");
       for (Map.Entry entry : menu.entrySet()) {
         System.out.printf("%s - %s %n", entry.getKey(), entry.getValue());
       }
@@ -31,13 +32,35 @@ public class Manager {
       choice = scanner.nextLine();
       switch (choice) {
         case "add":
-          vault.addAccount(promptNewAccount());
+          addNewAccount(promptNewAccount());
           break;
         case "quit":
           System.out.println("Quitting...");
           break;
       }
     } while (!choice.equals("quit"));
+  }
+
+  private void addNewAccount(Account account) {
+    boolean tryAgain = true;
+    do {
+      System.out.printf("This account will be added to your vault: %n%n%s %n%nAre you sure? [y/n]   ", account);
+      String input = scanner.nextLine().trim();
+      switch (input) {
+        case "yes": case "y":
+          vault.addAccount(account);
+          System.out.println("Account added.");
+          tryAgain = false;
+          break;
+        case "no": case "n":
+          System.out.println("Account was not added.");
+          tryAgain = false;
+          break;
+        default:
+          System.out.println("Please input either 'yes' or 'no'. Try again.");
+          break;
+      }
+    } while (tryAgain);
   }
 
   //TODO: Finish promptNewAccount method
