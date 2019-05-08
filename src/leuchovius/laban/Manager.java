@@ -17,6 +17,7 @@ public class Manager {
     menu = new HashMap<>();
     scanner = new Scanner(System.in);
     menu.put("add", "Add a password to your vault");
+    menu.put("browse", "Browse passwords and account details by service and username");
     menu.put("quit", "Exit Password Manager");
   }
 
@@ -28,14 +29,19 @@ public class Manager {
       for (Map.Entry entry : menu.entrySet()) {
         System.out.printf("%s - %s %n", entry.getKey(), entry.getValue());
       }
-      System.out.print("Please enter your choice: ");
+      System.out.printf("%nPlease enter your choice: ");
       choice = scanner.nextLine();
       switch (choice) {
         case "add":
           addNewAccount(promptNewAccount());
           break;
+        case "browse":
+          //TODO: Add browse option
         case "quit":
           System.out.println("Quitting...");
+          break;
+        default:
+          System.out.printf("Unknown command '%s'. Please try again. %n%n");
           break;
       }
     } while (!choice.equals("quit"));
@@ -67,7 +73,7 @@ public class Manager {
   private Account promptNewAccount() {
     Account account = null;
     Boolean isValid = false;
-    System.out.printf("Account information related to your password: "
+    System.out.printf("%nAccount information related to your password: "
         + "%nTip! If you don't want a certain piece of info to accompany your password, "
         + "skip it by just pressing enter. %n");
     do {
