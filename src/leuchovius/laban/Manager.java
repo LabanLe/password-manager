@@ -1,5 +1,7 @@
 package leuchovius.laban;
 
+import java.util.ArrayList;
+import java.util.List;
 import leuchovius.laban.model.Account;
 import leuchovius.laban.model.Vault;
 
@@ -33,10 +35,12 @@ public class Manager {
       choice = scanner.nextLine();
       switch (choice) {
         case "add":
-          addNewAccount(promptNewAccount());
+          promptAddAccount(promptNewAccount());
           break;
         case "browse":
           //TODO: Add browse option
+          displayService();
+          break;
         case "quit":
           System.out.println("Quitting...");
           break;
@@ -47,7 +51,14 @@ public class Manager {
     } while (!choice.equals("quit"));
   }
 
-  private void addNewAccount(Account account) {
+  private void displayService() {
+    List<String> byService = new ArrayList<>(vault.byService());
+    for (int i = 0; i < byService.size(); i++) {
+      System.out.printf("%d.)  %s %n", i + 1, byService.get(i));
+    }
+  }
+
+  private void promptAddAccount(Account account) {
     boolean tryAgain = true;
     do {
       System.out.printf("This account will be added to your vault: %n%n%s %n%nAre you sure? [y/n]   ", account);
