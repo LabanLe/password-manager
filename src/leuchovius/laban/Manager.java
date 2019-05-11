@@ -1,7 +1,9 @@
 package leuchovius.laban;
 
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import leuchovius.laban.model.Account;
 import leuchovius.laban.model.Vault;
 
@@ -38,24 +40,59 @@ public class Manager {
           promptAddAccount(promptNewAccount());
           break;
         case "browse":
-          //TODO: Add browse option
-          displayService();
+          String service = promptChoice(vault.byService());
+          String name = promptChoice(vault.namesForService(service));
+          List<String> passwords = new ArrayList<>(vault.passesForServiceName(service, name));
+          displayPasswords(passwords, service, name);
           break;
         case "quit":
           System.out.println("Quitting...");
           break;
         default:
-          System.out.printf("Unknown command '%s'. Please try again. %n%n");
+          System.out.printf("Unknown command '%s'. Please try again. %n%n", choice);
           break;
       }
     } while (!choice.equals("quit"));
   }
 
-  private void displayService() {
-    List<String> byService = new ArrayList<>(vault.byService());
-    for (int i = 0; i < byService.size(); i++) {
-      System.out.printf("%d.)  %s %n", i + 1, byService.get(i));
+  private void displayPasswords(List passwords, String service, String name) {
+    System.out.printf("%nPasswords for service '%s' and username '%s': %n", service, name);
+    displayList(passwords);
+    System.console().readPassword("");  //Wait for user pressing enter
+  }
+
+  private void displayList(List list) {
+    System.out.println();
+    for (int i = 0; i < list.size(); i++) {
+      System.out.printf("%d.)  %s %n", i + 1, list.get(i));
     }
+  }
+
+  private String promptChoice(Set<String> options) {
+    List<String> optionList = new ArrayList<>(options);
+    int index = 0;
+    boolean isValidIndex = false;
+    do {
+      displayList(optionList);
+      try {
+        index = promptIndex(optionList);
+        isValidIndex = true;
+      } catch (NumberFormatException nfe) {
+        System.out.println("Please input a number. Try again.");
+      } catch (IndexOutOfBoundsException iobe) {
+        System.out.println(iobe.getMessage() + ". Please try again.");
+      }
+    } while (!isValidIndex);
+    return optionList.get(index);
+  }
+
+  private int promptIndex(List list) throws NumberFormatException, IndexOutOfBoundsException {
+    System.out.print("Enter your choice: ");
+    int indexInput = Integer.parseInt(scanner.nextLine());
+    if (indexInput < 1 || indexInput > list.size()) {
+      throw new IndexOutOfBoundsException("There is no option corresponding to the index '" + indexInput + "', it is either too large or too small");
+    }
+    return indexInput - 1;
   }
 
   private void promptAddAccount(Account account) {
@@ -80,7 +117,6 @@ public class Manager {
     } while (tryAgain);
   }
 
-  //TODO: Finish promptNewAccount method
   private Account promptNewAccount() {
     Account account = null;
     Boolean isValid = false;
