@@ -40,10 +40,14 @@ public class Manager {
           promptAddAccount(promptNewAccount());
           break;
         case "browse":
-          String service = promptChoice(vault.byService());
-          String name = promptChoice(vault.namesForService(service));
-          List<String> passwords = new ArrayList<>(vault.passesForServiceName(service, name));
-          displayPasswords(passwords, service, name);
+          try {
+            String service = promptChoice(vault.byService());
+            String name = promptChoice(vault.namesForService(service));
+            List<String> passwords = new ArrayList<>(vault.passesForServiceName(service, name));
+            displayPasswords(passwords, service, name);
+          } catch (IllegalArgumentException iae) {
+            System.out.printf("%s. Please add a password to your vault. %n%n", iae.getMessage());
+          }
           break;
         case "quit":
           System.out.println("Quitting...");
@@ -55,22 +59,27 @@ public class Manager {
     } while (!choice.equals("quit"));
   }
 
-  private void displayPasswords(List passwords, String service, String name) {
-    System.out.printf("%nPasswords for service '%s' and username '%s': %n", service, name);
+  private void displayPasswords(List passwords, String service, String name) throws IllegalArgumentException {
+    System.out.printf("%nPasswords for service '%s' and username '%s': %n%n", service, name);
     displayList(passwords);
     System.console().readPassword("");  //Wait for user pressing enter
   }
 
-  private void displayList(List list) {
-    System.out.println();
+  private void displayList(List list) throws IllegalArgumentException {
+    if (list.isEmpty()) {
+      throw new IllegalArgumentException("Nothing provided to display");
+    }
     for (int i = 0; i < list.size(); i++) {
       System.out.printf("%d.)  %s %n", i + 1, list.get(i));
     }
   }
 
-  private String promptChoice(Set<String> options) {
+  private String promptChoice(Set<String> options) throws IllegalArgumentException {
     List<String> optionList = new ArrayList<>(options);
     int index = 0;
+    if (optionList.isEmpty()) {
+      throw new IllegalArgumentException("No options were provided to choose from");
+    }
     boolean isValidIndex = false;
     do {
       displayList(optionList);
