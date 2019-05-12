@@ -11,7 +11,7 @@ public class Account {
     this.password = password;
   }
 
-  private String normalizeInput(String input) throws IllegalArgumentException {
+  private final String normalizeInput(String input) throws IllegalArgumentException {
     input = input.trim();
     if (input.length() > 20) {
       throw new IllegalArgumentException("Input can not be longer than 20 characters");
@@ -33,5 +33,20 @@ public class Account {
   @Override
   public String toString() {
     return String.format("Account: Username %s on service %s using password %s", name, service, password);
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    } else if (o == null) {
+      return false;
+    } else if (!(o instanceof Account)) {
+      return false;
+    }
+    Account other = (Account) o;
+    return service.equals(other.getService())
+        && name.equals(other.getName())
+        && password.equals(other.getPassword());
   }
 }
