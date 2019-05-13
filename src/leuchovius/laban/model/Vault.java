@@ -51,4 +51,8 @@ public class Vault {
     }
   }
 
+  public boolean contains(Account account) {
+    return accounts.contains(account);
+  }
+
 }

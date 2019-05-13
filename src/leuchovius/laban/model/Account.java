@@ -8,7 +8,14 @@ public class Account {
   public Account(String service, String name, String password) throws IllegalArgumentException {
     this.service = normalizeInput(service);
     this.name = normalizeInput(name);
-    this.password = password;
+    this.password = validatePassword(password);
+  }
+
+  private final String validatePassword(String password) throws IllegalArgumentException {
+    if (password.length() < 1) {
+      throw new IllegalArgumentException("Password can not be shorter than 1 character");
+    }
+    return password;
   }
 
   private final String normalizeInput(String input) throws IllegalArgumentException {

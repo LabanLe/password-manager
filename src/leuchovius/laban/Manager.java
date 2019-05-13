@@ -1,6 +1,5 @@
 package leuchovius.laban;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +21,7 @@ public class Manager {
     scanner = new Scanner(System.in);
     menu.put("add", "Add a password to your vault");
     menu.put("browse", "Browse passwords and account details by service and username");
-    menu.put("quit", "Exit Password Manager");
+    menu.put("quit OR exit", "Exit Password Manager");
   }
 
   //TODO: Finish run method
@@ -41,22 +40,27 @@ public class Manager {
           break;
         case "browse":
           try {
-            String service = promptChoice(vault.byService());
-            String name = promptChoice(vault.namesForService(service));
-            List<String> passwords = new ArrayList<>(vault.passesForServiceName(service, name));
-            displayPasswords(passwords, service, name);
+            browse();
           } catch (IllegalArgumentException iae) {
             System.out.printf("%s. Please add a password to your vault. %n%n", iae.getMessage());
           }
           break;
         case "quit":
+        case "exit":
           System.out.println("Quitting...");
           break;
         default:
           System.out.printf("Unknown command '%s'. Please try again. %n%n", choice);
           break;
       }
-    } while (!choice.equals("quit"));
+    } while (!choice.equals("quit") && !choice.equals("exit"));
+  }
+
+  private void browse() {
+    String service = promptChoice(vault.byService());
+    String name = promptChoice(vault.namesForService(service));
+    List<String> passwords = new ArrayList<>(vault.passesForServiceName(service, name));
+    displayPasswords(passwords, service, name);
   }
 
   private void displayPasswords(List passwords, String service, String name) throws IllegalArgumentException {
@@ -106,24 +110,30 @@ public class Manager {
 
   private void promptAddAccount(Account account) {
     boolean tryAgain = true;
-    do {
-      System.out.printf("This account will be added to your vault: %n%n%s %n%nAre you sure? [y/n]   ", account);
-      String input = scanner.nextLine().trim();
-      switch (input) {
-        case "yes": case "y":
-          vault.addAccount(account);
-          System.out.println("Account added.");
-          tryAgain = false;
-          break;
-        case "no": case "n":
-          System.out.println("Account was not added.");
-          tryAgain = false;
-          break;
-        default:
-          System.out.println("Please input either 'yes' or 'no'. Try again.");
-          break;
-      }
-    } while (tryAgain);
+    if (!vault.contains(account)) {
+      do {
+        System.out.printf("This account will be added to your vault: %n%n%s %n%nAre you sure? [y/n]   ", account);
+        String input = scanner.nextLine().trim();
+        switch (input) {
+          case "yes":
+          case "y":
+            vault.addAccount(account);
+            System.out.println("Account added.");
+            tryAgain = false;
+            break;
+          case "no":
+          case "n":
+            System.out.println("Account was not added.");
+            tryAgain = false;
+            break;
+          default:
+            System.out.println("Please input either 'yes' or 'no'. Try again.");
+            break;
+        }
+      } while (tryAgain);
+    } else {
+      System.out.printf("%n%nThis account already exists in your vault: %n%n%s %n%nAccount was not added.", account);
+    }
   }
 
   private Account promptNewAccount() {
