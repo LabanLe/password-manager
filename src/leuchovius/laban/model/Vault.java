@@ -16,6 +16,21 @@ public class Vault {
   public void addAccount(Account account) {
     accounts.add(account);
   }
+  public boolean removeAccount(Account account) { return accounts.remove(account); }
+  /*
+  Gets an account from the vault which fields are equal to the method arguments,
+  if no accounts are found it returns 'null'
+  */
+  public Account getAccount(String service, String name, String password) {
+    for (Account account : accounts) {
+      if (account.getService().equals(service)
+          && account.getName().equals(name)
+          && account.getPassword().equals(password)) {
+        return account;
+      }
+    }
+    return null;
+  }
 
   public Set<String> namesForService(String service) {
     Set<String> names = new HashSet<>();
