@@ -1,11 +1,11 @@
 package leuchovius.laban;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import leuchovius.laban.model.Account;
 import leuchovius.laban.model.Vault;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -21,6 +21,7 @@ public class Manager {
     scanner = new Scanner(System.in);
     menu.put("add", "Add a password to your vault");
     menu.put("browse", "Browse passwords and account details by service and username");
+    menu.put("edit", "Browse accounts and edit the details of the chosen account");
     menu.put("quit OR exit", "Exit Password Manager");
   }
 
@@ -36,11 +37,21 @@ public class Manager {
       choice = scanner.nextLine();
       switch (choice) {
         case "add":
+          System.out.printf("%nAccount information related to your password: "
+              + "%nTip! If you don't want a certain piece of info to accompany your password, "
+              + "skip it by just pressing enter. %n");
           promptAddAccount(promptNewAccount());
           break;
         case "browse":
           try {
             browse();
+          } catch (IllegalArgumentException iae) {
+            System.out.printf("%s. Please add a password to your vault. %n%n", iae.getMessage());
+          }
+          break;
+        case "edit":
+          try {
+            editAccount(choose());
           } catch (IllegalArgumentException iae) {
             System.out.printf("%s. Please add a password to your vault. %n%n", iae.getMessage());
           }
@@ -56,7 +67,45 @@ public class Manager {
     } while (!choice.equals("quit") && !choice.equals("exit"));
   }
 
-  private void browse() {
+  private void editAccount(Account account) {
+    System.out.printf("Edit account: %n%n%s %n%n", account);
+    Account editedAccount = promptNewAccount();
+    boolean tryAgain = true;
+    if (!vault.contains(editedAccount)) {
+      do {
+        System.out.printf("Original account: %s %n%nEdited account: %s %n%nDo you want to save your changes? [y/n]   ", account, editedAccount);
+        switch (scanner.nextLine().trim()) {
+          case "yes":
+          case "y":
+            vault.removeAccount(account);
+            vault.addAccount(editedAccount);
+            System.out.println("Your changes were saved.");
+            tryAgain = false;
+            break;
+          case "no":
+          case "n":
+            System.out.println("Your changes were not saved.");
+            tryAgain = false;
+            break;
+          default:
+            System.out.println("Please input either 'yes' or 'no'. Try again.");
+            break;
+        }
+      } while (tryAgain);
+    } else {
+      System.out.printf("%n%nAn account with the same details already exists: %n%s %n%nChanges were therefore not saved.", editedAccount);
+    }
+  }
+
+  private Account choose() throws IllegalArgumentException {
+    String service = promptChoice(vault.byService());
+    String name = promptChoice(vault.namesForService(service));
+    String password = promptChoice(vault.passesForServiceName(service, name));
+    return vault.getAccount(service, name, password);
+  }
+
+  //TODO: Make browse and choose shorter and use the same base method instead of two different but similar methods
+  private void browse() throws IllegalArgumentException {
     String service = promptChoice(vault.byService());
     String name = promptChoice(vault.namesForService(service));
     List<String> passwords = new ArrayList<>(vault.passesForServiceName(service, name));
@@ -139,9 +188,6 @@ public class Manager {
   private Account promptNewAccount() {
     Account account = null;
     Boolean isValid = false;
-    System.out.printf("%nAccount information related to your password: "
-        + "%nTip! If you don't want a certain piece of info to accompany your password, "
-        + "skip it by just pressing enter. %n");
     do {
       System.out.print("Service (where you use your account): ");
       String service = scanner.nextLine();
