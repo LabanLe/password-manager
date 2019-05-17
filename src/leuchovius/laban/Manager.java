@@ -21,6 +21,7 @@ public class Manager {
     menu = new HashMap<>();
     scanner = new Scanner(System.in);
     menu.put("add", "Add a password to your vault");
+    menu.put("remove OR rm", "Remove a password from your vault");
     menu.put("view", "View passwords and account details added to your vault");
     menu.put("edit", "Browse accounts and edit the details of the chosen account");
     menu.put("toggle", "Toggles between browsing passwords by service and name and just viewing the passwords in a list");
@@ -44,6 +45,13 @@ public class Manager {
               + "skip it by just pressing enter. %n");
           promptAddAccount(promptNewAccount());
           break;
+        case "remove": case "rm":
+          try {
+            promptRemoveAccount(choose());
+          } catch (IllegalArgumentException iae) {
+            System.out.printf("%s. Please add a password to your vault. %n%n", iae.getMessage());
+          }
+          break;
         case "view":
           try {
             view();
@@ -53,7 +61,7 @@ public class Manager {
           break;
         case "edit":
           try {
-            editAccount(choose());
+            promptEditAccount(choose());
           } catch (IllegalArgumentException iae) {
             System.out.printf("%s. Please add a password to your vault. %n%n", iae.getMessage());
           }
@@ -86,7 +94,30 @@ public class Manager {
     return isBrowseEnabled;
   }
 
-  private void editAccount(Account account) {
+  private void promptRemoveAccount(Account account) {
+    boolean tryAgain = true;
+    do {
+      System.out.printf("This password with its associated account details will be permanently deleted from your vault: %n%n%s %nAre you sure? [y/n]   ", account);
+      switch (scanner.nextLine().trim()) {
+        case "yes":
+        case "y":
+          vault.removeAccount(account);
+          System.out.println("Account was deleted.");
+          tryAgain = false;
+          break;
+        case "no":
+        case "n":
+          System.out.println("Account was not deleted.");
+          tryAgain = false;
+          break;
+        default:
+          System.out.println("Please input either 'yes' or 'no'. Try again.");
+          break;
+      }
+    } while (tryAgain);
+  }
+
+  private void promptEditAccount(Account account) {
     System.out.printf("Edit account: %n%n%s %n%n", account);
     Account editedAccount = promptNewAccount();
     boolean tryAgain = true;
