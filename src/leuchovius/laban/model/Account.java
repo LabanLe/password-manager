@@ -1,5 +1,7 @@
 package leuchovius.laban.model;
 
+import java.util.Objects;
+
 public class Account {
   private String service;
   private String name;
@@ -40,6 +42,11 @@ public class Account {
   @Override
   public String toString() {
     return String.format("Account: Username %s on service %s using password %s", name, service, password);
+  }
+
+  @Override
+  public final int hashCode() {
+    return Objects.hash(service, name, password);
   }
 
   @Override
