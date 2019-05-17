@@ -14,14 +14,16 @@ public class Manager {
   private Map<String, String> menu;
   private Scanner scanner;
   private Vault vault;
+  private boolean isBrowseEnabled = true;
 
   public Manager(Vault vault) {
     this.vault = vault;
     menu = new HashMap<>();
     scanner = new Scanner(System.in);
     menu.put("add", "Add a password to your vault");
-    menu.put("browse", "Browse passwords and account details by service and username");
+    menu.put("view", "View passwords and account details added to your vault");
     menu.put("edit", "Browse accounts and edit the details of the chosen account");
+    menu.put("toggle", "Toggles between browsing passwords by service and name and just viewing the passwords in a list");
     menu.put("quit OR exit", "Exit Password Manager");
   }
 
@@ -42,9 +44,9 @@ public class Manager {
               + "skip it by just pressing enter. %n");
           promptAddAccount(promptNewAccount());
           break;
-        case "browse":
+        case "view":
           try {
-            browse();
+            view();
           } catch (IllegalArgumentException iae) {
             System.out.printf("%s. Please add a password to your vault. %n%n", iae.getMessage());
           }
@@ -56,6 +58,14 @@ public class Manager {
             System.out.printf("%s. Please add a password to your vault. %n%n", iae.getMessage());
           }
           break;
+        case "toggle":
+          boolean isEnabled = toggleBrowse();
+          if (isEnabled) {
+            System.out.println("Browsing enabled. You can now browse passwords and account details by name and service.");
+          } else {
+            System.out.println("Browsing disabled. You can now view passwords and account details in one list.");
+          }
+          break;
         case "quit":
         case "exit":
           System.out.println("Quitting...");
@@ -65,6 +75,15 @@ public class Manager {
           break;
       }
     } while (!choice.equals("quit") && !choice.equals("exit"));
+  }
+
+  private boolean toggleBrowse() {
+    if (isBrowseEnabled) {
+      isBrowseEnabled = false;
+    } else {
+      isBrowseEnabled = true;
+    }
+    return isBrowseEnabled;
   }
 
   private void editAccount(Account account) {
@@ -98,18 +117,27 @@ public class Manager {
   }
 
   private Account choose() throws IllegalArgumentException {
-    String service = promptChoice(vault.byService());
-    String name = promptChoice(vault.namesForService(service));
-    String password = promptChoice(vault.passesForServiceName(service, name));
-    return vault.getAccount(service, name, password);
+    if (isBrowseEnabled) {
+      String service = promptChoice(vault.byService());
+      String name = promptChoice(vault.namesForService(service));
+      String password = promptChoice(vault.passesForServiceName(service, name));
+      return vault.getAccount(service, name, password);
+    } else {
+      return vault.getAccount(promptChoice(vault.getAll()));
+    }
   }
 
   //TODO: Make browse and choose shorter and use the same base method instead of two different but similar methods
-  private void browse() throws IllegalArgumentException {
-    String service = promptChoice(vault.byService());
-    String name = promptChoice(vault.namesForService(service));
-    List<String> passwords = new ArrayList<>(vault.passesForServiceName(service, name));
-    displayPasswords(passwords, service, name);
+  private void view() throws IllegalArgumentException {
+    if (isBrowseEnabled) {
+      String service = promptChoice(vault.byService());
+      String name = promptChoice(vault.namesForService(service));
+      List<String> passwords = new ArrayList<>(vault.passesForServiceName(service, name));
+      displayPasswords(passwords, service, name);
+    } else {
+      displayList(new ArrayList(vault.getAll()));
+      System.console().readPassword("");  //Wait for user pressing enter
+    }
   }
 
   private void displayPasswords(List passwords, String service, String name) throws IllegalArgumentException {
@@ -127,17 +155,20 @@ public class Manager {
     }
   }
 
-  private String promptChoice(Set<String> options) throws IllegalArgumentException {
-    List<String> optionList = new ArrayList<>(options);
+  private String promptChoice(Set options) throws IllegalArgumentException {
+    return promptChoice(new ArrayList<>(options));
+  }
+
+  private String promptChoice(List options) throws IllegalArgumentException {
     int index = 0;
-    if (optionList.isEmpty()) {
+    if (options.isEmpty()) {
       throw new IllegalArgumentException("No options were provided to choose from");
     }
     boolean isValidIndex = false;
     do {
-      displayList(optionList);
+      displayList(options);
       try {
-        index = promptIndex(optionList);
+        index = promptIndex(options);
         isValidIndex = true;
       } catch (NumberFormatException nfe) {
         System.out.println("Please input a number. Try again.");
@@ -145,7 +176,7 @@ public class Manager {
         System.out.println(iobe.getMessage() + ". Please try again.");
       }
     } while (!isValidIndex);
-    return optionList.get(index);
+    return options.get(index).toString();
   }
 
   private int promptIndex(List list) throws NumberFormatException, IndexOutOfBoundsException {
