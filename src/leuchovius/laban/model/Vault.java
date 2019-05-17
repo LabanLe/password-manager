@@ -1,12 +1,10 @@
 package leuchovius.laban.model;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Set;
 
 public class Vault {
-  private List<Account> accounts = new ArrayList<>();
+  private Set<Account> accounts = new HashSet<>();
 
   //TODO: Make the constructor
   public Vault() {
@@ -17,6 +15,8 @@ public class Vault {
     accounts.add(account);
   }
   public boolean removeAccount(Account account) { return accounts.remove(account); }
+  public Set<Account> getAll() { return accounts; }
+
   /*
   Gets an account from the vault which fields are equal to the method arguments,
   if no accounts are found it returns 'null'
@@ -26,6 +26,15 @@ public class Vault {
       if (account.getService().equals(service)
           && account.getName().equals(name)
           && account.getPassword().equals(password)) {
+        return account;
+      }
+    }
+    return null;
+  }
+
+  public Account getAccount(String accountDesc) {
+    for (Account account : accounts) {
+      if (account.toString().equals(accountDesc)) {
         return account;
       }
     }
